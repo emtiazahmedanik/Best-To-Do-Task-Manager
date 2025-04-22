@@ -1,7 +1,12 @@
+import 'package:besttodotask/data/service/networkClient.dart';
+import 'package:besttodotask/data/utils/urls.dart';
+import 'package:besttodotask/widgets/screenBackground.dart';
+import 'package:besttodotask/widgets/snackBarMessage.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:square_progress_indicator/square_progress_indicator.dart';
 
-import '../../widgets/screenBackground.dart';
 
 class Registrationscreen extends StatefulWidget {
   const Registrationscreen({super.key});
@@ -20,6 +25,9 @@ class _RegistrationscreenState extends State<Registrationscreen> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+  bool _isLoading = false;
+  bool _obscure = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +37,7 @@ class _RegistrationscreenState extends State<Registrationscreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Form(
                 key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,6 +52,13 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                       decoration: InputDecoration(
                         hintText: 'Email',
                       ),
+                      validator: (String? value){
+                        String email = value?.trim() ?? '';
+                        if(EmailValidator.validate(email) == false){
+                          return "Enter a valid Email";
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       textInputAction: TextInputAction.next,
@@ -51,6 +67,12 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                       decoration: InputDecoration(
                           hintText: 'First Name'
                       ),
+                      validator: (String? value){
+                        if(value?.trim().isEmpty ?? true){
+                          return "Enter first name";
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       textInputAction: TextInputAction.next,
@@ -59,27 +81,61 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                       decoration: InputDecoration(
                           hintText: 'Last Name'
                       ),
+                      validator: (String? value){
+                        if(value?.trim().isEmpty ?? true){
+                          return "Enter last name";
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.phone,
                       controller: _mobileController,
                       decoration: InputDecoration(
-                          hintText: 'Mobile'
+                          hintText: 'Mobile',
                       ),
+                      validator: (String? value){
+                        RegExp regEx = RegExp(r"^(?:\+88|88)?(01[3-9]\d{8})$");
+                        String phone = value?.trim() ?? "";
+                        if(regEx.hasMatch(phone) == false ){
+                          return "Enter valid phone number";
+                        }
+                        return null;
+                      },
                     ),
                     TextFormField(
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.visiblePassword,
                       controller: _passwordController,
+                      obscureText: _obscure,
                       decoration: InputDecoration(
-                          hintText: 'Password'
+                          hintText: 'Password',
+                          suffixIcon: buildObscureButton()
+                      ),
+                      validator: (String? value){
+                        if((value?.isEmpty ?? true) || (value!.length<6)){
+                          return "Enter password at least 6 character";
+                        }
+                        return null;
+                      },
+                    ),
+                    Visibility(
+                      visible: !_isLoading,
+                      child: ElevatedButton(
+                        onPressed: _onTapSubmit,
+                        child:const Icon(Icons.arrow_circle_right_outlined),
+
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: _onTapSubmit,
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-
+                    Visibility(
+                      visible: _isLoading,
+                      child: Center(
+                        child: SquareProgressIndicator(
+                          color: Colors.green,
+                          height: 34,
+                        ),
+                      ),
                     ),
                     Center(
                       child: RichText(
@@ -104,12 +160,48 @@ class _RegistrationscreenState extends State<Registrationscreen> {
     );
   }
 
+  Widget buildObscureButton() {
+    return IconButton(
+        onPressed: (){
+          _obscure = !_obscure;
+          setState(() {});
+        },
+        icon:_obscure
+            ? Icon(Icons.remove_red_eye_outlined)
+            : Icon(Icons.remove_red_eye_outlined,color: Colors.red,)
+    );
+  }
+
+
   void _onTapSignInButton(){
     Navigator.pop(context);
   }
 
   void _onTapSubmit(){
+    if(_formKey.currentState!.validate()){
+      _registerUser();
+    }
+  }
+  Future<void> _registerUser() async{
+    _isLoading = true;
+    setState(() {});
+    Map<String,dynamic> requestBody = {
+      "email": _emailController.text.trim(),
+      "firstName": _firstNameController.text.trim(),
+      "lastName": _lastNameController.text.trim(),
+      "mobile": _mobileController.text.trim(),
+      "password": _passwordController.text.trim()
+    };
 
+    NetworkResponse response = await NetworkClient.postRequest(url: Urls.registerUrl,body: requestBody);
+
+    _isLoading = false;
+    setState(() {});
+    if(response.isSuccess){
+      showSnakeBarMessage(context: context, message: "Registration success");
+    }else{
+      showSnakeBarMessage(context: context, message: response.errorMessage, isError: true);
+    }
   }
 
   @override

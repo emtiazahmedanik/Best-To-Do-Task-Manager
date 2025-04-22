@@ -1,85 +1,117 @@
 import 'dart:convert';
 
+import 'package:besttodotask/screen/controller/authController.dart';
 import 'package:http/http.dart';
 import 'package:logger/logger.dart';
 
-class NetworkResponse{
+class NetworkResponse {
   final bool isSuccess;
   final int statusCode;
   final Map<String, dynamic>? data;
-  final String? errorMessage ;
+  final String errorMessage;
 
   NetworkResponse({
-        required this.isSuccess,
-        required this.statusCode,
-        this.data,
-        this.errorMessage= "Something went wrong"
-      });
+    required this.isSuccess,
+    required this.statusCode,
+    this.data,
+    this.errorMessage = "Something wrong",
+  });
 }
 
-class NetworkClient{
+class NetworkClient {
   static final Logger _logger = Logger();
 
-  static Future<NetworkResponse> getRequest({required String url}) async{
 
+  static Future<NetworkResponse> getRequest({required String url}) async {
     {
       try {
         Uri uri = Uri.parse(url);
-        Response response = await get(uri);
-        _preRequestLogging(url: url,body: response.body);
+        Map<String,String> headers = {
+          "token":AuthController.token ?? ''
+        };
+        Response response = await get(uri,headers: headers);
+        _preRequestLogging(url: url, body: response.body);
         if (response.statusCode == 200) {
           final decodedJson = jsonDecode(response.body);
-          return NetworkResponse(isSuccess: true,
-              statusCode: response.statusCode,
-              data: decodedJson);
-        } else {
           return NetworkResponse(
-              isSuccess: false, statusCode: response.statusCode);
+            isSuccess: true,
+            statusCode: response.statusCode,
+            data: decodedJson,
+          );
+        } else {
+          final decodedJson = jsonDecode(response.body);
+          String errorMsg = decodedJson["data"] ?? "Something went wrong";
+          _logger.e(errorMsg);
+          return NetworkResponse(
+            isSuccess: false,
+            statusCode: response.statusCode,
+            errorMessage: errorMsg,
+          );
         }
       } on Exception catch (e) {
         _logger.e(e.toString());
-        return NetworkResponse(isSuccess: false, statusCode: -1, errorMessage: e.toString());
+        return NetworkResponse(
+          isSuccess: false,
+          statusCode: -1,
+          errorMessage: e.toString(),
+        );
       }
     }
   }
 
-  static Future<NetworkResponse> postRequest({required String url, Map<String, dynamic>? body}) async{
-
+  static Future<NetworkResponse> postRequest({required String url, Map<String, dynamic>? body,}) async {
     {
       try {
         Uri uri = Uri.parse(url);
+        Map<String,String> headers = {
+          "token":AuthController.token ?? '',
+          'content-type': 'application/json'
+        };
         Response response = await post(
           uri,
-          headers: {'content-type':'application/json'},
-          body: jsonEncode(body)
+          headers: headers,
+          body: jsonEncode(body),
         );
-        _postRequestLogging(url: url,body: response.body,statusCode: response.statusCode);
+        _postRequestLogging(
+          url: url,
+          body: response.body,
+          statusCode: response.statusCode,
+          headers: headers
+        );
         if (response.statusCode == 200) {
           final decodedJson = jsonDecode(response.body);
-          return NetworkResponse(isSuccess: true,
-              statusCode: response.statusCode,
-              data: decodedJson);
+          return NetworkResponse(
+            isSuccess: true,
+            statusCode: response.statusCode,
+            data: decodedJson,
+          );
         } else {
           return NetworkResponse(
-              isSuccess: false, statusCode: response.statusCode);
+            isSuccess: false,
+            statusCode: response.statusCode,
+          );
         }
-
       } on Exception catch (e) {
         _logger.e(e.toString());
-        return NetworkResponse(isSuccess: false, statusCode: -1, errorMessage: e.toString());
+        return NetworkResponse(
+          isSuccess: false,
+          statusCode: -1,
+          errorMessage: e.toString(),
+        );
       }
     }
   }
 
-  static void _preRequestLogging({ required String url, String? body}){
-    _logger.i(
-      "Url=>$url \n Response Body=>$body"
-    );
-  }
-  static void _postRequestLogging({ String? url, String? body,int? statusCode}){
-    _logger.i(
-        "Url=>$url \nstatusCode=>$statusCode \n Response Body=>$body"
-    );
+  static void _preRequestLogging({required String url, String? body}) {
+    _logger.i("Url=>$url \n Response Body=>$body");
   }
 
+  static void _postRequestLogging({
+    String? url,
+    String? body,
+    int? statusCode,
+    Map<String,String>? headers
+  }) {
+    _logger.i("Url=>$url \nstatusCode=>$statusCode \n Response Body=>$body \n header: $headers");
+  }
 }

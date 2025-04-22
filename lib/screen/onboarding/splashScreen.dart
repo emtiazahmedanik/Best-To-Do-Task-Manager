@@ -1,4 +1,6 @@
+import 'package:besttodotask/screen/controller/authController.dart';
 import 'package:besttodotask/screen/onboarding/loginScreen.dart';
+import 'package:besttodotask/screen/task/mainBottomNavScreen.dart';
 import 'package:besttodotask/utility/utility.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:flutter/material.dart';
@@ -12,28 +14,32 @@ class Splashscreen extends StatefulWidget {
 }
 
 class _SplashscreenState extends State<Splashscreen> {
-  
-  Future<void> _moveToNextScreen() async{
+  Future<void> _moveToNextScreen() async {
     await Future.delayed(const Duration(seconds: 2));
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Loginscreen()));
+    final bool isLoggedIn = await AuthController.checkIfUserLoggedIn();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => isLoggedIn ? const MainBottomNavScreen() : const Loginscreen(),
+      ),
+    );
   }
-  
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _moveToNextScreen();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Screenbackground(
-          child: Center(
-              child: SvgPicture.asset(AssetPath.logoSvg,width: 120,)
-          )
-
-      )
+        child: Center(child: SvgPicture.asset(AssetPath.logoSvg, width: 120)),
+      ),
     );
   }
 }
