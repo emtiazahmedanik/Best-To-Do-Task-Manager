@@ -6,4 +6,6 @@ class Urls{
   static const String recoverOTP = "$baseUrl/RecoverVerifyOtp";
   static const String recoverResetPassword = "$baseUrl/RecoverResetPassword";
   static const String updateProfile = "$baseUrl/ProfileUpdate";
+  static const String createTask = "$baseUrl/createTask";
+  static const String taskStatusCount = "$baseUrl/taskStatusCount";
 }

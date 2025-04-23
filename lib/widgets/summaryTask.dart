@@ -22,7 +22,7 @@ class SummaryTask extends StatelessWidget {
           child: Column(
             children: [
               Text("$count",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
-              Text(title)
+              Text(title, style: TextStyle(color: Colors.black),)
             ],
           ),
         ),
