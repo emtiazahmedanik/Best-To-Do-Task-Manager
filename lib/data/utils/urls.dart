@@ -8,4 +8,9 @@ class Urls{
   static const String updateProfile = "$baseUrl/ProfileUpdate";
   static const String createTask = "$baseUrl/createTask";
   static const String taskStatusCount = "$baseUrl/taskStatusCount";
+  static const String newTask = "$baseUrl/listTaskByStatus/New";
+  static const String progressTask = "$baseUrl/listTaskByStatus/Progress";
+  static const String completedTask = "$baseUrl/listTaskByStatus/Completed";
+  static const String cancelledTask = "$baseUrl/listTaskByStatus/Cancelled";
+
 }

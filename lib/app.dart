@@ -1,8 +1,4 @@
-import 'package:besttodotask/screen/onboarding/forgotPasswordEmailVerificationScreen.dart';
-import 'package:besttodotask/screen/onboarding/forgotPasswordPinVerificationScreen.dart';
-import 'package:besttodotask/screen/onboarding/loginScreen.dart';
-import 'package:besttodotask/screen/onboarding/registrationScreen.dart';
-import 'package:besttodotask/screen/onboarding/setPasswordScreen.dart';
+
 import 'package:besttodotask/screen/onboarding/splashScreen.dart';
 import 'package:flutter/material.dart';
 
