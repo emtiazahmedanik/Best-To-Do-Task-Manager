@@ -1,3 +1,5 @@
+import 'package:besttodotask/data/utils/encodedDefaultImage.dart';
+
 class UserModel {
   final String id;
   final String email;
@@ -22,7 +24,7 @@ class UserModel {
         firstName: jsonData["firstName"] ?? '',
         lastName: jsonData["lastName"] ?? '',
         mobile: jsonData["mobile"] ?? '',
-        photo: jsonData["photo"] ?? ''
+        photo: jsonData["photo"] ?? EncodedDefaultImage.defaultImage
     );
   }
 

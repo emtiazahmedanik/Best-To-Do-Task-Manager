@@ -12,16 +12,19 @@ import '../../widgets/screenBackground.dart';
 
 class Pinverificationscreen extends StatefulWidget {
   final String email;
-  const Pinverificationscreen({super.key,required this.email});
+
+  const Pinverificationscreen({super.key, required this.email});
 
   @override
-  State<Pinverificationscreen> createState() => _PinverificationscreenState(this.email);
+  State<Pinverificationscreen> createState() =>
+      _PinverificationscreenState(this.email);
 }
 
 class _PinverificationscreenState extends State<Pinverificationscreen> {
   final _pinCodeController = TextEditingController();
   late TapGestureRecognizer _signInRecognizer;
   final String email;
+
   _PinverificationscreenState(this.email);
 
   bool _isLoading = false;
@@ -120,7 +123,7 @@ class _PinverificationscreenState extends State<Pinverificationscreen> {
     );
   }
 
-  Future<void> _onTapVerifyButton() async{
+  Future<void> _onTapVerifyButton() async {
     setState(() {
       _isLoading = true;
     });
@@ -130,13 +133,19 @@ class _PinverificationscreenState extends State<Pinverificationscreen> {
     setState(() {
       _isLoading = false;
     });
-    if(response.isSuccess) {
+    if (response.isSuccess) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Setpasswordscreen(email: email,OTP: otp,)),
+        MaterialPageRoute(
+          builder: (context) => Setpasswordscreen(email: email, OTP: otp),
+        ),
       );
-    }else{
-      showSnakeBarMessage(context: context, message: "Something went wrong",isError: true);
+    } else {
+      showSnakeBarMessage(
+        context: context,
+        message: response.errorMessage,
+        isError: true,
+      );
     }
   }
 

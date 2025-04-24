@@ -52,6 +52,7 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
                 return TaskCard(
                   taskStatus: TaskStatus.cancelled,
                   taskModel: _taskList[index],
+                  refreshTaskList: _refreshScreen,
                 );
               },
               separatorBuilder: (context, index) {
@@ -91,6 +92,11 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
     );
   }
 
+  void _refreshScreen(){
+    _getAllTask();
+    _getAllTaskStatusCount();
+  }
+
   Future<void> _getAllTaskStatusCount() async {
     setState(() {
       _isStatusCountLoading = true;
@@ -126,7 +132,7 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
     });
     if (response.isSuccess) {
       TaskListModel taskListModel = TaskListModel.fromJson(response.data!);
-      _taskList = taskListModel.taskList;
+        _taskList = taskListModel.taskList;
     } else {
       showSnakeBarMessage(
         context: context,

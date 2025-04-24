@@ -1,4 +1,4 @@
-class Urls{
+class Urls {
   static const String baseUrl = "http://35.73.30.144:2005/api/v1";
   static const String registerUrl = "$baseUrl/Registration";
   static const String loginUrl = "$baseUrl/Login";
@@ -12,5 +12,9 @@ class Urls{
   static const String progressTask = "$baseUrl/listTaskByStatus/Progress";
   static const String completedTask = "$baseUrl/listTaskByStatus/Completed";
   static const String cancelledTask = "$baseUrl/listTaskByStatus/Cancelled";
+
+  static String updateTask(String id, String status) =>
+      "$baseUrl/updateTaskStatus/$id/$status";
+  static String deleteTask(String id) => "$baseUrl/deleteTask/$id";
 
 }

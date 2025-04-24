@@ -5,11 +5,20 @@ import 'package:besttodotask/screen/onboarding/loginScreen.dart';
 import 'package:besttodotask/screen/profile/profileUpdateScreen.dart';
 import 'package:flutter/material.dart';
 
-class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
+class TMAppBar extends StatefulWidget implements PreferredSizeWidget {
   const TMAppBar({super.key, this.fromProfile});
 
   final bool? fromProfile;
 
+  @override
+  State<TMAppBar> createState() => _TMAppBarState();
+
+  @override
+  // TODO: implement preferredSize
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+}
+
+class _TMAppBarState extends State<TMAppBar> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -17,7 +26,7 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.green,
       title: GestureDetector(
         onTap: () {
-          if (fromProfile ?? false) {
+          if (widget.fromProfile ?? false) {
             return;
           }
           _onProfileTap(context);
@@ -74,7 +83,11 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ProfileUpdateScreen()),
-    );
+    ).then((result){
+      if(result == "Profile Updated"){
+        setState(() {});
+      }
+    });
   }
 
   Future<void> _onPressLogOutButton(BuildContext context) async {
@@ -86,7 +99,5 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  @override
-  // TODO: implement preferredSize
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+
 }

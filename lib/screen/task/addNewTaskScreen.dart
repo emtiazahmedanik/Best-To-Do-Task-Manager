@@ -23,7 +23,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(backgroundColor: Colors.green,),
       body: Screenbackground(
         child: SingleChildScrollView(
           child: Padding(
@@ -90,8 +90,10 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   void _onTapSubmitButton() {
     if (_formKey.currentState!.validate()) {
       addNewTask();
+
     }
   }
+
 
   Future<void> addNewTask() async {
     setState(() {
@@ -112,6 +114,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
     if(response.isSuccess){
       showSnakeBarMessage(context: context, message: "New task added");
       _clearTextField();
+      Navigator.pop(context,"updated");
     }else{
       showSnakeBarMessage(context: context, message: response.errorMessage,isError: true);
     }

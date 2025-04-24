@@ -52,6 +52,7 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
                 return TaskCard(
                   taskStatus: TaskStatus.completed,
                   taskModel: _taskList[index],
+                  refreshTaskList: _refreshScreen,
                 );
               },
               separatorBuilder: (context, index) {
@@ -89,6 +90,11 @@ class _CompletedTaskListScreenState extends State<CompletedTaskListScreen> {
         ),
       ),
     );
+  }
+
+  void _refreshScreen(){
+    _getAllTask();
+    _getAllTaskStatusCount();
   }
 
   Future<void> _getAllTaskStatusCount() async {

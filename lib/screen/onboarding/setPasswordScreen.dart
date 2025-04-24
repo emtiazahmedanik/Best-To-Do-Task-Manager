@@ -30,6 +30,9 @@ class _SetpasswordscreenState extends State<Setpasswordscreen> {
   final _confirmPasswordController = TextEditingController();
 
   bool _isLoading = false;
+  bool _obscure = true;
+  bool _obscureConfirmPassword = true;
+
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -61,8 +64,11 @@ class _SetpasswordscreenState extends State<Setpasswordscreen> {
                   TextFormField(
                     keyboardType: TextInputType.visiblePassword,
                     controller: _setPasswordController,
+                    obscureText: _obscure,
                     decoration: InputDecoration(
-                        hintText: 'New Password'
+                        hintText: 'New Password',
+                      suffixIcon: buildObscureButton(),
+
                     ),
                     validator: (String? value) {
                       if ((value?.isEmpty ?? true) || (value!.length < 6)) {
@@ -74,8 +80,10 @@ class _SetpasswordscreenState extends State<Setpasswordscreen> {
                   TextFormField(
                     keyboardType: TextInputType.visiblePassword,
                     controller: _confirmPasswordController,
+                    obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
-                        hintText: 'Confirm Password'
+                        hintText: 'Confirm Password',
+                      suffixIcon: buildObscureButtonForConfirmPassword()
                     ),
                     validator: (String? value) {
                       if (value != _setPasswordController.text) {
@@ -126,6 +134,32 @@ class _SetpasswordscreenState extends State<Setpasswordscreen> {
       ),
     );
   }
+  Widget buildObscureButton() {
+    return IconButton(
+      onPressed: () {
+        _obscure = !_obscure;
+        setState(() {});
+      },
+      icon:
+      _obscure
+          ? Icon(Icons.remove_red_eye_outlined,color: Colors.black,)
+          : Icon(Icons.remove_red_eye_outlined, color: Colors.red),
+    );
+  }
+  Widget buildObscureButtonForConfirmPassword() {
+    return IconButton(
+      onPressed: () {
+        _obscureConfirmPassword = !_obscureConfirmPassword;
+        setState(() {});
+      },
+      icon:
+      _obscureConfirmPassword
+          ? Icon(Icons.remove_red_eye_outlined,color: Colors.black,)
+          : Icon(Icons.remove_red_eye_outlined, color: Colors.red),
+    );
+  }
+
+
 
   void _onTapSignIn() {
     Navigator.pushAndRemoveUntil(
@@ -156,7 +190,7 @@ class _SetpasswordscreenState extends State<Setpasswordscreen> {
             context, MaterialPageRoute(builder: (context) =>const Loginscreen()),
             (pre) => false);
       }else{
-        showSnakeBarMessage(context: context, message: "Something went wrong",isError: true);
+        showSnakeBarMessage(context: context, message: response.errorMessage,isError: true);
       }
     }
   }

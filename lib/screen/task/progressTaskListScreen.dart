@@ -51,6 +51,7 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
                 return TaskCard(
                   taskStatus: TaskStatus.progress,
                   taskModel: _taskList[index],
+                  refreshTaskList: _refreshScreen,
                 );
               },
               separatorBuilder: (context, index) {
@@ -88,6 +89,11 @@ class _ProgressTaskListScreenState extends State<ProgressTaskListScreen> {
         ),
       ),
     );
+  }
+
+  void _refreshScreen(){
+    _getAllTask();
+    _getAllTaskStatusCount();
   }
 
   Future<void> _getAllTaskStatusCount() async {

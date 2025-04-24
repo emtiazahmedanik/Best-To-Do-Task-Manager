@@ -8,7 +8,6 @@ import 'package:besttodotask/screen/controller/authController.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:besttodotask/widgets/tmAppBar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
@@ -46,92 +45,99 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: TMAppBar(fromProfile: true),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUnfocus,
-            child: Column(
-              spacing: 8,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: 100,
-                    width: 100,
-                    child: CircleAvatar(
-                      backgroundImage:
-                          _image != null
-                              ? FileImage(File(_image!.path))
-                              : AssetImage("assets/images/default.jpg"),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async{
+        if(didPop) return;
+        Navigator.pop(context,"Profile Updated");
+      },
+      child: Scaffold(
+        appBar: TMAppBar(fromProfile: true),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUnfocus,
+              child: Column(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 30),
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      height: 100,
+                      width: 100,
+                      child: CircleAvatar(
+                        backgroundImage:
+                            AuthController.userModel?.photo != null
+                                ? MemoryImage(base64Decode(AuthController.userModel!.photo))
+                                : null
+                      ),
                     ),
                   ),
-                ),
-                Text("Update Profile", style: TextTheme.of(context).titleLarge),
-                SizedBox(height: 12),
-                buildContainer(),
-                TextFormField(
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.name,
-                  controller: _firstNameController,
-                  decoration: InputDecoration(hintText: 'First Name'),
-                  validator: (String? value) {
-                    if (value?.trim().isEmpty ?? true) {
-                      return "Enter your first name";
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.name,
-                  controller: _lastNameController,
-                  decoration: InputDecoration(hintText: 'Last Name'),
-                  validator: (String? value) {
-                    if (value?.trim().isEmpty ?? true) {
-                      return "Enter your last name";
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.phone,
-                  controller: _mobileController,
-                  decoration: InputDecoration(hintText: 'Mobile'),
-                  validator: (String? value) {
-                    RegExp regEx = RegExp(r"^(?:\+88|88)?(01[3-9]\d{8})$");
-                    String phone = value?.trim() ?? "";
-                    if (regEx.hasMatch(phone) == false) {
-                      return "Enter valid phone number";
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  textInputAction: TextInputAction.next,
-                  obscureText: true,
-                  keyboardType: TextInputType.visiblePassword,
-                  controller: _passwordController,
-                  decoration: InputDecoration(hintText: 'Password'),
-                ),
-                Visibility(
-                  visible: _isLoading == false,
-                  replacement: Center(
-                    child: SquareProgressIndicator(color: Colors.green),
+                  Text("Update Profile", style: TextTheme.of(context).titleLarge),
+                  SizedBox(height: 12),
+                  buildContainer(),
+                  TextFormField(
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.name,
+                    controller: _firstNameController,
+                    decoration: InputDecoration(hintText: 'First Name'),
+                    validator: (String? value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return "Enter your first name";
+                      }
+                      return null;
+                    },
                   ),
-                  child: ElevatedButton(
-                    onPressed: _onTapSubmit,
-                    child: const Icon(Icons.arrow_circle_right_outlined),
+                  TextFormField(
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.name,
+                    controller: _lastNameController,
+                    decoration: InputDecoration(hintText: 'Last Name'),
+                    validator: (String? value) {
+                      if (value?.trim().isEmpty ?? true) {
+                        return "Enter your last name";
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                SizedBox(height: 20),
-              ],
+                  TextFormField(
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.phone,
+                    controller: _mobileController,
+                    decoration: InputDecoration(hintText: 'Mobile'),
+                    validator: (String? value) {
+                      RegExp regEx = RegExp(r"^(?:\+88|88)?(01[3-9]\d{8})$");
+                      String phone = value?.trim() ?? "";
+                      if (regEx.hasMatch(phone) == false) {
+                        return "Enter valid phone number";
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    textInputAction: TextInputAction.next,
+                    obscureText: true,
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordController,
+                    decoration: InputDecoration(hintText: 'Password'),
+                  ),
+                  Visibility(
+                    visible: _isLoading == false,
+                    replacement: Center(
+                      child: SquareProgressIndicator(color: Colors.green),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _onTapSubmit,
+                      child: const Icon(Icons.arrow_circle_right_outlined),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -225,7 +231,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         );
         _clearController();
       } else {
-        showSnakeBarMessage(context: context, message: "Something went wrong");
+        showSnakeBarMessage(context: context, message: response.errorMessage);
       }
     }
   }
@@ -246,4 +252,6 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     _passwordController.dispose();
     super.dispose();
   }
+
+
 }

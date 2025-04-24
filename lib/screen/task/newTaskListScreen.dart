@@ -43,19 +43,23 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
                 child: Column(
                   children: [
                     buildSingleChildScrollView(),
-                    ListView.separated(
-                      primary: false,
-                      shrinkWrap: true,
-                      itemCount: _taskList.length,
-                      itemBuilder: (context, index) {
-                        return TaskCard(
-                          taskStatus: TaskStatus.sNew,
-                          taskModel: _taskList[index],
-                        );
-                      },
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(height: 8);
-                      },
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      child: ListView.separated(
+                        primary: false,
+                        shrinkWrap: true,
+                        itemCount: _taskList.length,
+                        itemBuilder: (context, index) {
+                          return TaskCard(
+                            taskStatus: TaskStatus.sNew,
+                            taskModel: _taskList[index],
+                            refreshTaskList: _refreshScreen,
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(height: 8);
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -91,6 +95,11 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
             ),
           ),
         );
+  }
+
+  void _refreshScreen(){
+    _getAllTask();
+    _getAllTaskStatusCount();
   }
 
   Future<void> _getAllTaskStatusCount() async {
@@ -142,6 +151,11 @@ class _NewTaskListScreenState extends State<NewTaskListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => AddNewTaskScreen()),
-    );
+    ).then((result){
+      if(result == "updated"){
+        _refreshScreen();
+      }
+    });
+
   }
 }

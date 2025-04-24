@@ -132,7 +132,7 @@ class _EmailverificationscreenState extends State<Emailverificationscreen> {
       } else {
         showSnakeBarMessage(
           context: context,
-          message: "Something went wrong",
+          message: response.errorMessage,
           isError: true,
         );
       }

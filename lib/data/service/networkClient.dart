@@ -14,7 +14,7 @@ class NetworkResponse {
     required this.isSuccess,
     required this.statusCode,
     this.data,
-    this.errorMessage = "Something wrong",
+    required this.errorMessage,
   });
 }
 
@@ -37,10 +37,11 @@ class NetworkClient {
             isSuccess: true,
             statusCode: response.statusCode,
             data: decodedJson,
+            errorMessage: ""
           );
         } else {
           final decodedJson = jsonDecode(response.body);
-          String errorMsg = decodedJson["data"] ?? "Something went wrong";
+          String errorMsg = decodedJson["data"] ?? "Something wrong";
           _logger.e(errorMsg);
           return NetworkResponse(
             isSuccess: false,
@@ -84,11 +85,16 @@ class NetworkClient {
             isSuccess: true,
             statusCode: response.statusCode,
             data: decodedJson,
+            errorMessage: ""
           );
         } else {
+          final decodedJson = jsonDecode(response.body);
+          String errorMsg = decodedJson["data"] ?? "Something wrong";
+          _logger.e(errorMsg);
           return NetworkResponse(
             isSuccess: false,
             statusCode: response.statusCode,
+            errorMessage: errorMsg
           );
         }
       } on Exception catch (e) {

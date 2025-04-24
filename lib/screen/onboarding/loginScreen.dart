@@ -188,7 +188,7 @@ class _LoginscreenState extends State<Loginscreen> {
         showSnakeBarMessage(context: context, message: "Login Successful");
       } else {
         showSnakeBarMessage(
-            context: context, message: "Login error", isError: true);
+            context: context, message: response.errorMessage, isError: true);
       }
     }
   }
