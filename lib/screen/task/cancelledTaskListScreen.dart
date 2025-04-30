@@ -1,30 +1,24 @@
-import 'package:besttodotask/data/model/TaskListModel.dart';
-import 'package:besttodotask/data/model/taskModel.dart';
-import 'package:besttodotask/data/model/taskStatusCountListModel.dart';
-import 'package:besttodotask/data/model/taskStatusCountModel.dart';
-import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
+import 'package:besttodotask/screen/controller/taskListController.dart';
+import 'package:besttodotask/screen/controller/taskStatusCountController.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
-import 'package:besttodotask/widgets/summaryTask.dart';
 import 'package:besttodotask/widgets/taskCard.dart';
+import 'package:besttodotask/widgets/taskStatusCountWidget.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
-
-
 
 class CancelledTaskListScreen extends StatefulWidget {
   const CancelledTaskListScreen({super.key});
 
   @override
-  State<CancelledTaskListScreen> createState() => _CancelledTaskListScreenState();
+  State<CancelledTaskListScreen> createState() =>
+      _CancelledTaskListScreenState();
 }
 
 class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
-  bool _isStatusCountLoading = false;
-  bool _isTaskLoading = false;
-
-  List<TaskModel> _taskList = [];
-  List<TaskStatusCountModel> _taskCountList = [];
+  final _taskStatusCountController = Get.find<TaskStatusCountController>();
+  final _taskListController = Get.find<TaskListController>();
 
   @override
   void initState() {
@@ -37,113 +31,80 @@ class _CancelledTaskListScreenState extends State<CancelledTaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-      _isTaskLoading
-          ? Center(child: SquareProgressIndicator(color: Colors.green))
-          : SingleChildScrollView(
-        child: Column(
-          children: [
-            buildSingleChildScrollView(),
-            ListView.separated(
-              primary: false,
-              shrinkWrap: true,
-              itemCount: _taskList.length,
-              itemBuilder: (context, index) {
-                return TaskCard(
-                  taskStatus: TaskStatus.cancelled,
-                  taskModel: _taskList[index],
-                  refreshTaskList: _refreshScreen,
-                );
-              },
-              separatorBuilder: (context, index) {
-                return const SizedBox(height: 8);
-              },
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                buildTaskListCountView(),
+                GetBuilder<TaskListController>(
+                  builder: (_) {
+                    return ListView.separated(
+                      primary: false,
+                      shrinkWrap: true,
+                      itemCount: _taskListController.getTaskList.length,
+                      itemBuilder: (context, index) {
+                        return TaskCard(
+                          taskStatus: TaskStatus.cancelled,
+                          taskModel: _taskListController.getTaskList[index],
+                          refreshTaskList: _refreshScreen,
+                        );
+                      },
+                      separatorBuilder:
+                          (context, index) => const SizedBox(height: 8),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
 
-    );
-  }
-
-  Widget buildSingleChildScrollView() {
-    return _isStatusCountLoading
-        ? Center(child: SquareProgressIndicator())
-        : SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: SizedBox(
-          height: 100,
-          child: ListView.builder(
-            primary: false,
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            itemCount: _taskCountList.length,
-            itemBuilder: (context, index) {
-              return SummaryTask(
-                title: _taskCountList[index].status,
-                count: _taskCountList[index].count,
-              );
+          GetBuilder<TaskListController>(
+            builder: (_) {
+              return _taskListController.getIsTaskLoading
+                  ? Container(
+                color: Colors.black.withAlpha(50),
+                child: Center(
+                  child: SquareProgressIndicator(color: Colors.green),
+                ),
+              )
+                  : SizedBox.shrink();
             },
           ),
-        ),
+        ],
       ),
     );
   }
 
-  void _refreshScreen(){
+  void _refreshScreen() {
     _getAllTask();
     _getAllTaskStatusCount();
   }
 
   Future<void> _getAllTaskStatusCount() async {
-    setState(() {
-      _isStatusCountLoading = true;
-    });
-    final NetworkResponse response = await NetworkClient.getRequest(
-      url: Urls.taskStatusCount,
-    );
-    setState(() {
-      _isStatusCountLoading = false;
-    });
-    if (response.isSuccess) {
-      TaskStatusCountListModel taskStatusCountListModel =
-      TaskStatusCountListModel.fromJson(response.data ?? {});
-      _taskCountList = taskStatusCountListModel.statusCountList;
+    final bool isSuccess =
+        await _taskStatusCountController.getAllTaskStatusCount();
+    if (isSuccess) {
     } else {
       showSnakeBarMessage(
         context: context,
-        message: response.errorMessage,
+        message: _taskStatusCountController.getErrorMsg,
         isError: true,
       );
     }
   }
 
   Future<void> _getAllTask() async {
-    setState(() {
-      _isTaskLoading = true;
-    });
-    final NetworkResponse response = await NetworkClient.getRequest(
-      url: Urls.cancelledTask,
+    final bool isSuccess = await _taskListController.getAllTask(
+      Urls.cancelledTask,
     );
-    setState(() {
-      _isTaskLoading = false;
-    });
-    if (response.isSuccess) {
-      TaskListModel taskListModel = TaskListModel.fromJson(response.data!);
-        _taskList = taskListModel.taskList;
+    if (isSuccess) {
     } else {
       showSnakeBarMessage(
         context: context,
-        message: response.errorMessage,
+        message: _taskListController.getErrorMsg!,
         isError: true,
       );
     }
   }
-
-
 }
-
-
-

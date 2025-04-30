@@ -1,10 +1,9 @@
 import 'package:besttodotask/screen/controller/authController.dart';
-import 'package:besttodotask/screen/onboarding/loginScreen.dart';
-import 'package:besttodotask/screen/task/mainBottomNavScreen.dart';
 import 'package:besttodotask/utility/utility.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -18,13 +17,19 @@ class _SplashscreenState extends State<Splashscreen> {
     await Future.delayed(const Duration(seconds: 2));
     final bool isLoggedIn = await AuthController.checkIfUserLoggedIn();
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder:
-            (context) => isLoggedIn ? const MainBottomNavScreen() : const Loginscreen(),
-      ),
-    );
+    if(isLoggedIn){
+      Get.offAllNamed("/MainBottomNavScreen");
+    }else{
+      Get.offAllNamed("/LoginScreen");
+    }
+
+  //   Navigator.pushReplacement(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder:
+  //           (context) => isLoggedIn ? const MainBottomNavScreen() : const Loginscreen(),
+  //     ),
+  //   );
   }
 
   @override

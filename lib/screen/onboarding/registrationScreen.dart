@@ -1,11 +1,12 @@
-import 'package:besttodotask/data/service/networkClient.dart';
-import 'package:besttodotask/data/utils/urls.dart';
-import 'package:besttodotask/screen/onboarding/loginScreen.dart';
+
+import 'package:besttodotask/screen/controller/registrationController.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
 class Registrationscreen extends StatefulWidget {
@@ -23,9 +24,8 @@ class _RegistrationscreenState extends State<Registrationscreen> {
   final _passwordController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final _registrationController = Get.find<RegistrationController>();
 
-  bool _isLoading = false;
-  bool _obscure = true;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,10 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                   SizedBox(height: 30),
                   Text(
                     'Join With Us',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .titleLarge,
                   ),
                   TextFormField(
                     textInputAction: TextInputAction.next,
@@ -66,7 +69,9 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                     controller: _firstNameController,
                     decoration: InputDecoration(hintText: 'First Name'),
                     validator: (String? value) {
-                      if (value?.trim().isEmpty ?? true) {
+                      if (value
+                          ?.trim()
+                          .isEmpty ?? true) {
                         return "Enter first name";
                       }
                       return null;
@@ -78,7 +83,9 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                     controller: _lastNameController,
                     decoration: InputDecoration(hintText: 'Last Name'),
                     validator: (String? value) {
-                      if (value?.trim().isEmpty ?? true) {
+                      if (value
+                          ?.trim()
+                          .isEmpty ?? true) {
                         return "Enter last name";
                       }
                       return null;
@@ -98,37 +105,42 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                       return null;
                     },
                   ),
-                  TextFormField(
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.visiblePassword,
-                    controller: _passwordController,
-                    obscureText: _obscure,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
-                      suffixIcon: buildObscureButton(),
-                    ),
-                    validator: (String? value) {
-                      if ((value?.isEmpty ?? true) || (value!.length < 6)) {
-                        return "Enter password at least 6 character";
-                      }
-                      return null;
-                    },
+                  GetBuilder<RegistrationController>(
+                    builder: (_) {
+                      return TextFormField(
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.visiblePassword,
+                        controller: _passwordController,
+                        obscureText: _registrationController.getObscure,
+                        decoration: InputDecoration(
+                          hintText: 'Password',
+                          suffixIcon: buildObscureButton(),
+                        ),
+                        validator: (String? value) {
+                          if ((value?.isEmpty ?? true) || (value!.length < 6)) {
+                            return "Enter password at least 6 character";
+                          }
+                          return null;
+                        },
+                      );
+                    }
                   ),
-                  Visibility(
-                    visible: !_isLoading,
-                    child: ElevatedButton(
-                      onPressed: _onTapSubmit,
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
-                  Visibility(
-                    visible: _isLoading,
-                    child: Center(
-                      child: SquareProgressIndicator(
-                        color: Colors.green,
-                        height: 34,
-                      ),
-                    ),
+                  GetBuilder<RegistrationController>(
+                    builder: (_) {
+                      return Visibility(
+                        visible: _registrationController.getIsLoading == false,
+                        replacement: Center(
+                          child: SquareProgressIndicator(
+                            color: Colors.green,
+                            height: 34,
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _onTapSubmit,
+                          child: const Icon(Icons.arrow_circle_right_outlined),
+                        ),
+                      );
+                    }
                   ),
                   Center(
                     child: RichText(
@@ -142,8 +154,8 @@ class _RegistrationscreenState extends State<Registrationscreen> {
                             text: " Sign In",
                             style: TextStyle(color: Colors.green),
                             recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap = _onTapSignInButton,
+                            TapGestureRecognizer()
+                              ..onTap = _onTapSignInButton,
                           ),
                         ],
                       ),
@@ -159,20 +171,25 @@ class _RegistrationscreenState extends State<Registrationscreen> {
   }
 
   Widget buildObscureButton() {
-    return IconButton(
-      onPressed: () {
-        _obscure = !_obscure;
-        setState(() {});
-      },
-      icon:
-          _obscure
+    return GetBuilder<RegistrationController>(
+      builder: (GetxController controller) {
+        return IconButton(
+          onPressed: () {
+            _registrationController.setObscure =
+            !_registrationController.getObscure;
+          },
+          icon:
+          _registrationController.getObscure
               ? Icon(Icons.remove_red_eye_outlined)
               : Icon(Icons.remove_red_eye_outlined, color: Colors.red),
+        );
+      },
     );
   }
 
+
   void _onTapSignInButton() {
-    Navigator.pop(context);
+    Get.back();
   }
 
   void _onTapSubmit() {
@@ -182,34 +199,20 @@ class _RegistrationscreenState extends State<Registrationscreen> {
   }
 
   Future<void> _registerUser() async {
-    _isLoading = true;
-    setState(() {});
-    Map<String, dynamic> requestBody = {
-      "email": _emailController.text.trim(),
-      "firstName": _firstNameController.text.trim(),
-      "lastName": _lastNameController.text.trim(),
-      "mobile": _mobileController.text.trim(),
-      "password": _passwordController.text.trim(),
-    };
+    final isSuccess = await _registrationController.registerUser(
+        email: _emailController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        mobile: _mobileController.text.trim(),
+        password: _passwordController.text.trim());
 
-    NetworkResponse response = await NetworkClient.postRequest(
-      url: Urls.registerUrl,
-      body: requestBody,
-    );
-
-    _isLoading = false;
-    setState(() {});
-    if (response.isSuccess) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => Loginscreen()),
-        (predicate) => false,
-      );
+    if (isSuccess) {
+      Get.offAllNamed("/LoginScreen");
       showSnakeBarMessage(context: context, message: "Registration success");
     } else {
       showSnakeBarMessage(
         context: context,
-        message: response.errorMessage,
+        message: _registrationController.getErrorMsg,
         isError: true,
       );
     }

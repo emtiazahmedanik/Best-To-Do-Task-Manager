@@ -1,6 +1,5 @@
 import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
-import 'package:besttodotask/screen/controller/authController.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:flutter/material.dart';

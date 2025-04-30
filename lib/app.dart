@@ -1,13 +1,45 @@
 
+import 'package:besttodotask/controllerBinder.dart';
+import 'package:besttodotask/screen/onboarding/forgotPasswordEmailVerificationScreen.dart';
+import 'package:besttodotask/screen/onboarding/forgotPasswordPinVerificationScreen.dart';
+import 'package:besttodotask/screen/onboarding/loginScreen.dart';
+import 'package:besttodotask/screen/onboarding/registrationScreen.dart';
+import 'package:besttodotask/screen/onboarding/setPasswordScreen.dart';
 import 'package:besttodotask/screen/onboarding/splashScreen.dart';
+import 'package:besttodotask/screen/profile/profileUpdateScreen.dart';
+import 'package:besttodotask/screen/task/addNewTaskScreen.dart';
+import 'package:besttodotask/screen/task/cancelledTaskListScreen.dart';
+import 'package:besttodotask/screen/task/completedTaskListScreen.dart';
+import 'package:besttodotask/screen/task/mainBottomNavScreen.dart';
+import 'package:besttodotask/screen/task/newTaskListScreen.dart';
+import 'package:besttodotask/screen/task/progressTaskListScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class TaskManagerApp extends StatelessWidget {
   const TaskManagerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      initialRoute: "/",
+      getPages: [
+        GetPage(name: "/", page:()=> Splashscreen()),
+        GetPage(name: "/AddNewTaskScreen", page: ()=> AddNewTaskScreen()),
+        GetPage(name: "/CancelledTaskScreen", page: ()=> CancelledTaskListScreen()),
+        GetPage(name: "/CompletedTaskScreen", page: ()=> CompletedTaskListScreen()),
+        GetPage(name: "/MainBottomNavScreen", page: ()=> MainBottomNavScreen()),
+        GetPage(name: "/NewTaskScreen", page: ()=> NewTaskListScreen()),
+        GetPage(name: "/ProgressTaskScreen", page: ()=> ProgressTaskListScreen()),
+        GetPage(name: "/ProfileUpdateScreen", page: ()=> ProfileUpdateScreen()),
+        GetPage(name: "/RegistrationScreen", page: ()=> Registrationscreen()),
+        GetPage(name: "/LoginScreen", page: ()=> Loginscreen()),
+        GetPage(name: "/EmailVerificationScreen", page: ()=> Emailverificationscreen()),
+        GetPage(name: "/PinVerificationScreen", page: ()=> Pinverificationscreen()),
+        GetPage(name: "/SetPasswordScreen", page: ()=> Setpasswordscreen())
+
+      ],
+      initialBinding: ControllerBinder(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: "poppins",

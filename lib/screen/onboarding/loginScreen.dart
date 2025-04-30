@@ -1,15 +1,11 @@
-import 'package:besttodotask/data/model/loginModel.dart';
-import 'package:besttodotask/data/service/networkClient.dart';
-import 'package:besttodotask/data/utils/urls.dart';
-import 'package:besttodotask/screen/controller/authController.dart';
-import 'package:besttodotask/screen/onboarding/forgotPasswordEmailVerificationScreen.dart';
-import 'package:besttodotask/screen/onboarding/registrationScreen.dart';
-import 'package:besttodotask/screen/task/mainBottomNavScreen.dart';
+
+import 'package:besttodotask/screen/controller/loginController.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
 class Loginscreen extends StatefulWidget {
@@ -25,8 +21,7 @@ class _LoginscreenState extends State<Loginscreen> {
 
   final GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
 
-  bool _obscure = true;
-  bool _isLoading = false;
+  final _loginController = Get.find<LoginController>();
 
   @override
   Widget build(BuildContext context) {
@@ -50,44 +45,49 @@ class _LoginscreenState extends State<Loginscreen> {
                   keyboardType: TextInputType.emailAddress,
                   controller: _emailController,
                   decoration: InputDecoration(hintText: 'Email'),
-                  validator: (String? value){
+                  validator: (String? value) {
                     String? email = value?.trim() ?? '';
-                    if(EmailValidator.validate(email) == false){
+                    if (EmailValidator.validate(email) == false) {
                       return "Enter email";
                     }
                     return null;
                   },
                 ),
-                TextFormField(
-                  keyboardType: TextInputType.visiblePassword,
-                  controller: _passwordController,
-                  obscureText: _obscure,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    suffixIcon: buildObscureButton(),
-                  ),
-                  validator: (String? value){
-                    if((value?.isEmpty ?? true) || (value!.length<6)){
-                      return "Enter password at least 6 character";
-                    }
-                    return null;
-                  },
+                GetBuilder<LoginController>(
+                  builder: (_) {
+                    return TextFormField(
+                      keyboardType: TextInputType.visiblePassword,
+                      controller: _passwordController,
+                      obscureText: _loginController.getObscure,
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                        suffixIcon: buildObscureButton(),
+                      ),
+                      validator: (String? value) {
+                        if ((value?.isEmpty ?? true) || (value!.length < 6)) {
+                          return "Enter password at least 6 character";
+                        }
+                        return null;
+                      },
+                    );
+                  }
                 ),
-                Visibility(
-                  visible: !_isLoading,
-                  child: ElevatedButton(
-                    onPressed: _onTapSubmitButton,
-                    child: Icon(Icons.arrow_circle_right_outlined),
-                  ),
-                ),
-                Visibility(
-                  visible: _isLoading,
-                  child: Center(
-                    child: SquareProgressIndicator(
-                      color: Colors.green,
-                      height: 34,
-                    ),
-                  ),
+                GetBuilder<LoginController>(
+                  builder: (_) {
+                    return Visibility(
+                      visible: _loginController.getIsLoading == false,
+                      replacement: Center(
+                        child: SquareProgressIndicator(
+                          color: Colors.green,
+                          height: 34,
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _onTapSubmitButton,
+                        child: Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }
                 ),
                 Center(
                   child: Column(
@@ -127,30 +127,29 @@ class _LoginscreenState extends State<Loginscreen> {
   }
 
   Widget buildObscureButton() {
-    return IconButton(
-      onPressed: () {
-        _obscure = !_obscure;
-        setState(() {});
+    return GetBuilder<LoginController>(
+      builder: (GetxController controller) {
+        return IconButton(
+          onPressed: () {
+            _loginController.setObscure = !_loginController.getObscure;
+          },
+          icon:
+              _loginController.getObscure
+                  ? Icon(Icons.remove_red_eye_outlined)
+                  : Icon(Icons.remove_red_eye_outlined, color: Colors.red),
+        );
       },
-      icon:
-          _obscure
-              ? Icon(Icons.remove_red_eye_outlined)
-              : Icon(Icons.remove_red_eye_outlined, color: Colors.red),
     );
   }
 
   void _onTapSignUp() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Registrationscreen()),
-    );
+    Get.toNamed("/RegistrationScreen");
+
   }
 
   void _onTapForgotPassword() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => Emailverificationscreen()),
-    );
+    Get.toNamed("/EmailVerificationScreen");
+
   }
 
   void _onTapSubmitButton() {
@@ -159,36 +158,19 @@ class _LoginscreenState extends State<Loginscreen> {
 
   Future<void> _logInUser() async {
     if (_globalKey.currentState!.validate()) {
-      _isLoading = true;
-
-      setState(() {});
-      Map<String, dynamic> requestBody = {
-        "email": _emailController.text.trim(),
-        "password": _passwordController.text,
-      };
-      NetworkResponse response = await NetworkClient.postRequest(
-        url: Urls.loginUrl,
-        body: requestBody,
+      final bool isSuccess = await _loginController.logInUser(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
-      _isLoading = false;
-      setState(() {});
-      if (response.isSuccess) {
-        LoginModel loginModel = LoginModel.fromJson(response.data!);
-        //ToDo:save token to local
-        AuthController.saveUserInformation(
-            loginModel.token, loginModel.userModel);
-        //ToDO: local database set up
-        //ToDo: logged in/or not
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => MainBottomNavScreen()),
-              (pre) => false,
-        );
+      if (isSuccess) {
+        Get.offAllNamed("/MainBottomNavScreen");
         showSnakeBarMessage(context: context, message: "Login Successful");
       } else {
         showSnakeBarMessage(
-            context: context, message: response.errorMessage, isError: true);
+          context: context,
+          message: _loginController.getErrorMsg!,
+          isError: true,
+        );
       }
     }
   }

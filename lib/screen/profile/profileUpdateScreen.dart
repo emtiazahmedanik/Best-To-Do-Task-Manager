@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:besttodotask/data/model/userModel.dart';
 import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
@@ -231,7 +229,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         );
         _clearController();
       } else {
-        showSnakeBarMessage(context: context, message: response.errorMessage);
+        showSnakeBarMessage(context: context, message: response.errorMessage,isError: true);
       }
     }
   }
