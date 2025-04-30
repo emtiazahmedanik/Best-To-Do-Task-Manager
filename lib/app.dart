@@ -31,7 +31,6 @@ class TaskManagerApp extends StatelessWidget {
         GetPage(name: "/MainBottomNavScreen", page: ()=> MainBottomNavScreen()),
         GetPage(name: "/NewTaskScreen", page: ()=> NewTaskListScreen()),
         GetPage(name: "/ProgressTaskScreen", page: ()=> ProgressTaskListScreen()),
-        GetPage(name: "/ProfileUpdateScreen", page: ()=> ProfileUpdateScreen()),
         GetPage(name: "/RegistrationScreen", page: ()=> Registrationscreen()),
         GetPage(name: "/LoginScreen", page: ()=> Loginscreen()),
         GetPage(name: "/EmailVerificationScreen", page: ()=> Emailverificationscreen()),
