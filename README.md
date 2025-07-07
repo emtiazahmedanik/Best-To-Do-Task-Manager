@@ -15,6 +15,12 @@ Powered by GetX for efficient and reactive UI updates<br/><br/>
 🌐 API Integration<br/><br/>
 Connected with Ostad API for backend operations
 
+
+
+
+https://github.com/user-attachments/assets/2480dd24-6ade-4c2c-9bab-4e3d2317aca9
+
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
