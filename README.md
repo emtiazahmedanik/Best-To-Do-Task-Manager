@@ -15,9 +15,7 @@ Powered by GetX for efficient and reactive UI updates<br/><br/>
 🌐 API Integration<br/><br/>
 Connected with Ostad API for backend operations
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
 
 A few resources to get you started if this is your first Flutter project:
 
