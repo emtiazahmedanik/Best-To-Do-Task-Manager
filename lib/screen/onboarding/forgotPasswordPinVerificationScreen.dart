@@ -1,33 +1,31 @@
-import 'package:besttodotask/data/service/networkClient.dart';
+
 import 'package:besttodotask/data/utils/urls.dart';
-import 'package:besttodotask/screen/onboarding/loginScreen.dart';
-import 'package:besttodotask/screen/onboarding/setPasswordScreen.dart';
+import 'package:besttodotask/screen/controller/pinVerificationController.dart';
+import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
-import '../../widgets/screenBackground.dart';
 
 class Pinverificationscreen extends StatefulWidget {
-  final String email;
 
-  const Pinverificationscreen({super.key, required this.email});
+
+  const Pinverificationscreen({super.key});
 
   @override
   State<Pinverificationscreen> createState() =>
-      _PinverificationscreenState(this.email);
+      _PinverificationscreenState();
 }
 
 class _PinverificationscreenState extends State<Pinverificationscreen> {
   final _pinCodeController = TextEditingController();
   late TapGestureRecognizer _signInRecognizer;
-  final String email;
+  final _pinVerificationController = Get.find<PinVerificationController>();
 
-  _PinverificationscreenState(this.email);
-
-  bool _isLoading = false;
+  final  _email = Get.arguments;
 
   @override
   void initState() {
@@ -75,22 +73,24 @@ class _PinverificationscreenState extends State<Pinverificationscreen> {
                 onCompleted: (v) {},
                 appContext: context,
               ),
-              Visibility(
-                visible: !_isLoading,
-                child: ElevatedButton(
-                  onPressed: _onTapVerifyButton,
-                  child: const Text('Verify'),
-                ),
+              GetBuilder<PinVerificationController>(
+                builder: (_) {
+                  return Visibility(
+                    visible: _pinVerificationController.getIsLoading == false,
+                    replacement: Center(
+                      child: SquareProgressIndicator(
+                        color: Colors.green,
+                        height: 34,
+                      ),
+                    ),
+                    child: ElevatedButton(
+                      onPressed: _onTapVerifyButton,
+                      child: const Text('Verify'),
+                    ),
+                  );
+                }
               ),
-              Visibility(
-                visible: _isLoading,
-                child: Center(
-                  child: SquareProgressIndicator(
-                    color: Colors.green,
-                    height: 34,
-                  ),
-                ),
-              ),
+
               Center(
                 child: RichText(
                   text: TextSpan(
@@ -116,34 +116,26 @@ class _PinverificationscreenState extends State<Pinverificationscreen> {
   }
 
   void _onTapSignIn() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const Loginscreen()),
-      (pre) => false,
-    );
+    Get.offAllNamed("/LoginScreen");
+    // Navigator.pushAndRemoveUntil(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => const Loginscreen()),
+    //   (pre) => false,
+    // );
   }
 
   Future<void> _onTapVerifyButton() async {
-    setState(() {
-      _isLoading = true;
-    });
+
     final String otp = _pinCodeController.text;
-    final String url = "${Urls.recoverOTP}/$email/$otp";
-    NetworkResponse response = await NetworkClient.getRequest(url: url);
-    setState(() {
-      _isLoading = false;
-    });
-    if (response.isSuccess) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Setpasswordscreen(email: email, OTP: otp),
-        ),
-      );
+    final String url = "${Urls.recoverOTP}/$_email/$otp";
+    final isSuccess = await _pinVerificationController.onTapVerifyButton(otp: otp, url: url);
+    if (isSuccess) {
+
+      Get.toNamed("/SetPasswordScreen?otp=$otp&email=$_email");
     } else {
       showSnakeBarMessage(
         context: context,
-        message: response.errorMessage,
+        message: _pinVerificationController.getErrorMsg,
         isError: true,
       );
     }
@@ -151,8 +143,6 @@ class _PinverificationscreenState extends State<Pinverificationscreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    _pinCodeController.dispose();
     _signInRecognizer.dispose();
     super.dispose();
   }

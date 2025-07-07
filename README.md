@@ -1,6 +1,19 @@
 # hobeto
 
-A new Flutter project.
+🚀 Features <br/><br/>
+🔐 User Authentication <br/><br/>
+Sign up with email & password<br/>
+Login securely<br/>
+Forgot password support<br/>
+Email verification via OTP<br/><br/>
+✅ Task Management<br/><br/>
+Add new tasks<br/>
+Delete existing tasks<br/>
+View task list in real time<br/>
+🧠 State Management<br/><br/>
+Powered by GetX for efficient and reactive UI updates<br/><br/>
+🌐 API Integration<br/><br/>
+Connected with Ostad API for backend operations
 
 ## Getting Started
 

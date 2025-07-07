@@ -1,12 +1,11 @@
-import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
-import 'package:besttodotask/screen/onboarding/forgotPasswordPinVerificationScreen.dart';
-import 'package:besttodotask/screen/onboarding/loginScreen.dart';
+import 'package:besttodotask/screen/controller/emailVerificationController.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
 class Emailverificationscreen extends StatefulWidget {
@@ -21,8 +20,7 @@ class _EmailverificationscreenState extends State<Emailverificationscreen> {
   final _emailController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  bool _isLoading = false;
+  final _emailVerificationController = Get.find<EmailVerificationController>();
 
   @override
   Widget build(BuildContext context) {
@@ -61,21 +59,23 @@ class _EmailverificationscreenState extends State<Emailverificationscreen> {
                     return null;
                   },
                 ),
-                Visibility(
-                  visible: !_isLoading,
-                  child: ElevatedButton(
-                    onPressed: _onTabSubmit,
-                    child:Icon(Icons.arrow_circle_right_outlined),
-                  ),
-                ),
-                Visibility(
-                  visible: _isLoading,
-                  child: Center(
-                    child: SquareProgressIndicator(
-                      color: Colors.green,
-                      height: 34,
-                    ),
-                  ),
+                GetBuilder<EmailVerificationController>(
+                  builder: (_) {
+                    return Visibility(
+                      visible:
+                          _emailVerificationController.getIsLoading == false,
+                      replacement: Center(
+                        child: SquareProgressIndicator(
+                          color: Colors.green,
+                          height: 34,
+                        ),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _onTabSubmit,
+                        child: Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  },
                 ),
                 Center(
                   child: RichText(
@@ -104,38 +104,24 @@ class _EmailverificationscreenState extends State<Emailverificationscreen> {
   }
 
   void _onTapSignIn() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const Loginscreen()),
-      (pre) => false,
-    );
+    Get.offAllNamed("/LoginScreen");
   }
 
   Future<void> _onTabSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      final email = _emailController.text.trim();
-      final url = "${Urls.recoverEmail}/$email";
-      NetworkResponse response = await NetworkClient.getRequest(url: url);
-      setState(() {
-        _isLoading = false;
-      });
-      if (response.isSuccess) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Pinverificationscreen(email: email),
-          ),
-        );
-      } else {
-        showSnakeBarMessage(
-          context: context,
-          message: response.errorMessage,
-          isError: true,
-        );
-      }
+    final email = _emailController.text.trim();
+    final url = "${Urls.recoverEmail}/$email";
+    final isSuccess = await _emailVerificationController.onTapSubmit(
+      email: email,
+      url: url,
+    );
+    if (isSuccess) {
+      Get.toNamed("/PinVerificationScreen",arguments: email);
+    } else {
+      showSnakeBarMessage(
+        context: context,
+        message: _emailVerificationController.getErrorMsg,
+        isError: true,
+      );
     }
   }
 

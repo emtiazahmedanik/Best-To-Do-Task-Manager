@@ -1,9 +1,10 @@
 import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
-import 'package:besttodotask/screen/controller/authController.dart';
+import 'package:besttodotask/screen/controller/addNewTaskController.dart';
 import 'package:besttodotask/widgets/screenBackground.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
 class AddNewTaskScreen extends StatefulWidget {
@@ -17,13 +18,12 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final _titleEditingController = TextEditingController();
   final _descriptionEditingController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  bool _isLoading = false;
+  final _addNewTaskController = Get.find<AddNewTaskController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.green,),
+      appBar: AppBar(backgroundColor: Colors.green),
       body: Screenbackground(
         child: SingleChildScrollView(
           child: Padding(
@@ -70,13 +70,19 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                     },
                   ),
                   SizedBox(height: 12),
-                  Visibility(
-                    visible: _isLoading == false,
-                    replacement: const Center(child: SquareProgressIndicator(color: Colors.green,)),
-                    child: ElevatedButton(
-                      onPressed: _onTapSubmitButton,
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
+                  GetBuilder<AddNewTaskController>(
+                    builder: (_) {
+                      return Visibility(
+                        visible: _addNewTaskController.getIsLoading == false,
+                        replacement: const Center(
+                          child: SquareProgressIndicator(color: Colors.green),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _onTapSubmitButton,
+                          child: const Icon(Icons.arrow_circle_right_outlined),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -90,40 +96,39 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   void _onTapSubmitButton() {
     if (_formKey.currentState!.validate()) {
       addNewTask();
-
     }
   }
 
-
   Future<void> addNewTask() async {
-    setState(() {
-      _isLoading = true;
-    });
     Map<String, dynamic> requestBody = {
       "title": _titleEditingController.text.trim(),
       "description": _descriptionEditingController.text.trim(),
       "status": "New",
     };
-    final NetworkResponse response = await NetworkClient.postRequest(
+
+    final isSuccess = await _addNewTaskController.addNewTask(
       url: Urls.createTask,
-      body: requestBody,
+      requestBody: requestBody,
     );
-    setState(() {
-      _isLoading = false;
-    });
-    if(response.isSuccess){
+
+    if (isSuccess) {
       showSnakeBarMessage(context: context, message: "New task added");
       _clearTextField();
-      Navigator.pop(context,"updated");
-    }else{
-      showSnakeBarMessage(context: context, message: response.errorMessage,isError: true);
+      Navigator.pop(context, "updated");
+    } else {
+      showSnakeBarMessage(
+        context: context,
+        message: _addNewTaskController.getErrorMsg,
+        isError: true,
+      );
     }
   }
 
-  void _clearTextField(){
+  void _clearTextField() {
     _titleEditingController.clear();
     _descriptionEditingController.clear();
   }
+
   @override
   void dispose() {
     // TODO: implement dispose

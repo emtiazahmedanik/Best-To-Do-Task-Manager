@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:besttodotask/data/model/userModel.dart';
 import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
 import 'package:besttodotask/screen/controller/authController.dart';
+import 'package:besttodotask/screen/controller/profileUpdateController.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:besttodotask/widgets/tmAppBar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
 
@@ -29,8 +29,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   late final String _email;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  bool _isLoading = false;
+  final _profileUpdateController = Get.find<ProfileUpdateController>();
 
   @override
   void initState() {
@@ -47,9 +46,9 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, result) async{
-        if(didPop) return;
-        Navigator.pop(context,"Profile Updated");
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        Navigator.pop(context, "Profile Updated");
       },
       child: Scaffold(
         appBar: TMAppBar(fromProfile: true),
@@ -72,12 +71,17 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                       child: CircleAvatar(
                         backgroundImage:
                             AuthController.userModel?.photo != null
-                                ? MemoryImage(base64Decode(AuthController.userModel!.photo))
-                                : null
+                                ? MemoryImage(
+                                  base64Decode(AuthController.userModel!.photo),
+                                )
+                                : null,
                       ),
                     ),
                   ),
-                  Text("Update Profile", style: TextTheme.of(context).titleLarge),
+                  Text(
+                    "Update Profile",
+                    style: TextTheme.of(context).titleLarge,
+                  ),
                   SizedBox(height: 12),
                   buildContainer(),
                   TextFormField(
@@ -125,15 +129,19 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
                     controller: _passwordController,
                     decoration: InputDecoration(hintText: 'Password'),
                   ),
-                  Visibility(
-                    visible: _isLoading == false,
-                    replacement: Center(
-                      child: SquareProgressIndicator(color: Colors.green),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _onTapSubmit,
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
+                  GetBuilder<ProfileUpdateController>(
+                    builder: (_) {
+                      return Visibility(
+                        visible: _profileUpdateController.getIsLoading == false,
+                        replacement: Center(
+                          child: SquareProgressIndicator(color: Colors.green),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: _onTapSubmit,
+                          child: const Icon(Icons.arrow_circle_right_outlined),
+                        ),
+                      );
+                    },
                   ),
                   SizedBox(height: 20),
                 ],
@@ -171,7 +179,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
             SizedBox(width: 8),
             Expanded(
               child: Text(
-                  _image?.name ?? "Select your photo",
+                _image?.name ?? "Select your photo",
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -194,11 +202,6 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
 
   Future<void> _onTapSubmit() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-      //ToDo update profile
-
       Map<String, dynamic> requestBody = {
         "firstName": _firstNameController.text.trim(),
         "lastName": _lastNameController.text.trim(),
@@ -213,15 +216,12 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         requestBody["password"] = _passwordController.text;
       }
 
-      NetworkResponse response = await NetworkClient.postRequest(
+      final isSuccess = await _profileUpdateController.onTapSubmit(
+        requestBody: requestBody,
         url: Urls.updateProfile,
-        body: requestBody,
       );
 
-      setState(() {
-        _isLoading = false;
-      });
-      if (response.isSuccess) {
+      if (isSuccess) {
         requestBody["email"] = _email;
         UserModel user = UserModel.fromJson(requestBody);
         await AuthController.updateProfileData(user);
@@ -231,7 +231,11 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
         );
         _clearController();
       } else {
-        showSnakeBarMessage(context: context, message: response.errorMessage);
+        showSnakeBarMessage(
+          context: context,
+          message: _profileUpdateController.getErrorMsg,
+          isError: true,
+        );
       }
     }
   }
@@ -252,6 +256,4 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     _passwordController.dispose();
     super.dispose();
   }
-
-
 }

@@ -3,7 +3,9 @@ import 'package:besttodotask/data/service/networkClient.dart';
 import 'package:besttodotask/data/utils/urls.dart';
 import 'package:besttodotask/widgets/snackBarMessage.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:square_progress_indicator/square_progress_indicator.dart';
+
 
 enum TaskStatus { sNew, progress, completed, cancelled }
 
@@ -28,6 +30,7 @@ class _TaskCardState extends State<TaskCard> {
 
   @override
   Widget build(BuildContext context) {
+    final dateTime = DateTime.tryParse(widget.taskModel.createDate);
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 16),
       color: Colors.white,
@@ -43,7 +46,11 @@ class _TaskCardState extends State<TaskCard> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
             Text(widget.taskModel.description),
-            Text(widget.taskModel.createDate),
+            Text(
+              dateTime!=null
+                  ? DateFormat("yyyy-MM-dd – kk:mm").format(dateTime)
+                  :"Invalid Date"
+            ),
             Row(
               children: [
                 Chip(
